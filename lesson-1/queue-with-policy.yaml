@@ -1,0 +1,36 @@
+---
+apiVersion: sqs.aws.crossplane.io/v1beta1
+kind: Queue
+metadata:
+  name: my-queue
+  labels:
+    stage: example
+spec:
+  forProvider:
+    region: eu-central-1
+    delaySeconds: 4
+    policy: |
+      {
+        "Version": "2012-10-17",
+        "Id": "allow-s3",
+        "Statement": [
+          {
+            "Sid": "allow-s3",
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "s3.amazonaws.com"
+            },
+            "Action": [
+              "SQS:SendMessage"
+            ],
+            "Resource": "*",
+            "Condition": {
+              "ArnLike": {
+                "aws:SourceArn": "arn:aws:s3:*:*:*"
+              }
+            }
+          }
+        ]
+      }
+  providerConfigRef:
+    name: default

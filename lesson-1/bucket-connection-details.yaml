@@ -1,0 +1,15 @@
+---
+apiVersion: s3.aws.crossplane.io/v1beta1
+kind: Bucket
+metadata:
+  name: # give it a unique name
+spec:
+  writeConnectionSecretToRef:
+    name: my-bucket-connection-details
+    namespace: crossplane-system
+  deletionPolicy: Delete
+  forProvider:
+    acl: private
+    locationConstraint: eu-central-1
+  providerConfigRef:
+    name: default

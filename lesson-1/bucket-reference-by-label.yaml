@@ -1,0 +1,20 @@
+---
+apiVersion: s3.aws.crossplane.io/v1beta1
+kind: Bucket
+metadata:
+  name: # give it a unique name
+spec:
+  forProvider:
+    acl: private
+    locationConstraint: eu-central-1
+    notificationConfiguration:
+      queueConfigurations:
+        - events:
+            - s3:ObjectCreated:*
+            - s3:ObjectRemoved:*
+          # queueArn: (is resolved by the controller)
+          queueArnSelector:
+            matchLabels:
+              stage: example
+  providerConfigRef:
+    name: default

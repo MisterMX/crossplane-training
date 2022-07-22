@@ -1,0 +1,9 @@
+apiVersion: example.org/v1alpha1
+kind: Bucket
+metadata:
+  name: sample-bucket-4567
+  namespace: default
+spec:
+  paramters:
+    providerConfigRef:
+      name: default

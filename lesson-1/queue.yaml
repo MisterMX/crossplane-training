@@ -1,0 +1,11 @@
+---
+apiVersion: sqs.aws.crossplane.io/v1beta1
+kind: Queue
+metadata:
+  name: # give it a unique name
+spec:
+  forProvider:
+    region: eu-central-1
+    delaySeconds: 4
+  providerConfigRef:
+    name: default
