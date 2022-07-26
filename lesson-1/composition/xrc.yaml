@@ -1,0 +1,10 @@
+apiVersion: example.org/v1alpha1
+kind: Bucket
+metadata:
+  name: my-bucket
+  namespace: default
+spec:
+  parameters:
+    notifyEventNames:
+      - s3:ObjectCreated:*
+      - s3:ObjectRemoved:*

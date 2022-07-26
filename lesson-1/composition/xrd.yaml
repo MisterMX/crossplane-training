@@ -1,4 +1,3 @@
----
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
@@ -12,23 +11,22 @@ spec:
     kind: Bucket
     plural: buckets
   versions:
-  - name: v1alpha1
-    served: true
-    referenceable: true
-    schema:
-      openAPIV3Schema:
-        # Same as CRD schemas
-        type: object
-        properties:
-          spec:
-            type: object
-            properties:
-              providerConfigRef:
-                type: object
-                properties:
-                  name:
-                    type: string
-                required:
-                - name
-            required:
-            - providerConfigRef
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                parameters:
+                  type: object
+                  properties:
+                    notifyEventNames:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - notifyEventNames
