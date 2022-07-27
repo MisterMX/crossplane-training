@@ -1,0 +1,103 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: bucket-composition
+spec:
+  patchSets:
+    - name: my-patchset
+      patches:
+        - fromFieldPath: metadata.name
+          toFieldPath: metadata.name
+  compositeTypeRef:
+    apiVersion: example.org/v1alpha1
+    kind: XBucket
+  resources:
+    - name: bucket
+      base:
+        apiVersion: s3.aws.crossplane.io/v1beta1
+        kind: Bucket
+        metadata:
+          name: # patched
+        spec:
+          forProvider:
+            acl: private
+            locationConstraint: eu-central-1
+            notificationConfiguration:
+              queueConfigurations:
+              - events: # patched
+                queueArnRef:
+                  name: # patched
+          providerConfigRef:
+            name: # patched
+      readinessChecks:
+        # Is true if the field is not empty
+        - type: NonEmpty
+          fieldPath: status.atProvider.arn
+        # Is true if the field matches the given integer
+        - type: MatchInteger
+          fieldPath: status.atProvider.someIntField
+          matchInteger: 1
+        # Is true if the field matches the given string
+        - type: MatchString
+          fieldPath: status.atProvider.someStringField
+          matchString: "Hello World"
+        # Is always true
+        - type: None
+      patches:
+        # One ProviderConfig per namespace
+        - fromFieldPath: metadata.annotations[crossplane.io/claim-namespace]
+          toFieldPath: spec.providerConfigRef.name
+        - type: PatchSet
+          patchSetName: my-patchset
+        - fromFieldPath: spec.parameters.notifyEventNames
+          toFieldPath: spec.forProvider.notificationConfiguration.queueConfigurations[0].events
+        # Will fail until queue is ready
+        - fromFieldPath: status.resources.queue.status.atProvider.arn
+          toFieldPath: spec.forProvider.notificationConfiguration.queueConfigurations[0].queueArn
+          policy:
+            fromFieldPath: Required
+      connectionDetails:
+        - name: endpoint
+          fromConnectionSecretKey: endpoint
+        - name: name
+          fromFieldPath: metadata.name
+        - name: fixedValue
+          value: "Hello World"
+    - name: queue
+      base:
+        apiVersion: sqs.aws.crossplane.io/v1beta1
+        kind: Queue
+        metadata:
+          name: # patched
+        spec:
+          forProvider:
+            region: eu-central-1
+            delaySeconds: 4
+            policy: |
+              {
+                "Version": "2012-10-17",
+                "Id": "allow-s3",
+                "Statement": [
+                  {
+                    "Sid": "allow-s3",
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": "s3.amazonaws.com"
+                    },
+                    "Action": [
+                      "SQS:SendMessage"
+                    ],
+                    "Resource": "*",
+                    "Condition": {
+                      "ArnLike": {
+                        "aws:SourceArn": "arn:aws:s3:*:*:*"
+                      }
+                    }
+                  }
+                ]
+              }
+          providerConfigRef:
+            name: default
+      patches:
+        - fromFieldPath: metadata.name
+          toFieldPath: metadata.name

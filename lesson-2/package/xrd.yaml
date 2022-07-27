@@ -1,0 +1,36 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xbuckets.example.org
+spec:
+  group: example.org
+  names:
+    kind: XBucket
+    plural: xbuckets
+  claimNames:
+    kind: Bucket
+    plural: buckets
+  connectionSecretKeys:
+    - endpoint
+    - name
+    - fixedValue
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                parameters:
+                  type: object
+                  properties:
+                    notifyEventNames:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - notifyEventNames
